@@ -20,10 +20,10 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-teal-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-pink-600 rounded-lg flex items-center justify-center">
               <MapPin className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">LocalHub</span>
+            <span className="text-xl font-bold text-gray-900">MiamiLocal</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -32,7 +32,7 @@ const Header = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+                className="text-gray-700 hover:text-orange-600 transition-colors font-medium"
               >
                 {item.label}
               </a>
@@ -49,7 +49,7 @@ const Header = () => {
               <User className="w-4 h-4 mr-2" />
               Sign In
             </Button>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+            <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
               Add Business
             </Button>
           </div>
@@ -73,7 +73,7 @@ const Header = () => {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+                  className="text-gray-700 hover:text-orange-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -84,7 +84,7 @@ const Header = () => {
                   <User className="w-4 h-4 mr-2" />
                   Sign In
                 </Button>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 justify-start">
+                <Button size="sm" className="bg-orange-500 hover:bg-orange-600 justify-start">
                   Add Business
                 </Button>
               </div>
