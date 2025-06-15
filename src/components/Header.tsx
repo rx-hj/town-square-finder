@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Menu, X, User, Heart, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import AddBusinessDialog from './AddBusinessDialog';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -49,9 +50,11 @@ const Header = () => {
               <User className="w-4 h-4 mr-2" />
               Sign In
             </Button>
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
-              Add Business
-            </Button>
+            <AddBusinessDialog>
+              <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                Add Business
+              </Button>
+            </AddBusinessDialog>
           </div>
 
           {/* Mobile Menu Button */}
@@ -84,9 +87,11 @@ const Header = () => {
                   <User className="w-4 h-4 mr-2" />
                   Sign In
                 </Button>
-                <Button size="sm" className="bg-orange-500 hover:bg-orange-600 justify-start">
-                  Add Business
-                </Button>
+                <AddBusinessDialog>
+                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 justify-start">
+                    Add Business
+                  </Button>
+                </AddBusinessDialog>
               </div>
             </nav>
           </div>
