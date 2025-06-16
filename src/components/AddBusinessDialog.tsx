@@ -7,51 +7,134 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import AuthDialog from './AuthDialog';
+import { User } from 'lucide-react';
 
 const AddBusinessDialog = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     category: '',
     address: '',
     phone: '',
     description: '',
-    website: ''
+    website: '',
+    hours: ''
   });
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Business submission:', formData);
     
-    // Show success toast
-    toast({
-      title: "Business Submitted!",
-      description: "Thank you for submitting your business. We'll review it shortly.",
-    });
-    
-    // Reset form and close dialog
-    setFormData({
-      name: '',
-      category: '',
-      address: '',
-      phone: '',
-      description: '',
-      website: ''
-    });
-    setOpen(false);
+    if (!isAuthenticated || !user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to add a business.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('businesses')
+        .insert([
+          {
+            name: formData.name,
+            category: formData.category as any,
+            address: formData.address,
+            phone: formData.phone || null,
+            website: formData.website || null,
+            description: formData.description || null,
+            hours: formData.hours || null,
+            user_id: user.id,
+            rating: 0,
+            review_count: 0,
+            is_featured: false,
+            is_open: true
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error('Error adding business:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add business. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Business Added Successfully!",
+          description: "Your business has been submitted and will be reviewed shortly.",
+        });
+        
+        // Reset form and close dialog
+        setFormData({
+          name: '',
+          category: '',
+          address: '',
+          phone: '',
+          description: '',
+          website: '',
+          hours: ''
+        });
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setLoading(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Sign In Required</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600 mb-6">
+              You need to sign in to add a business to MiamiLocal.
+            </p>
+            <AuthDialog>
+              <Button className="bg-orange-500 hover:bg-orange-600">
+                Sign In to Continue
+              </Button>
+            </AuthDialog>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Your Business</DialogTitle>
         </DialogHeader>
@@ -80,7 +163,15 @@ const AddBusinessDialog = ({ children }: { children: React.ReactNode }) => {
                 <SelectItem value="service">Service</SelectItem>
                 <SelectItem value="entertainment">Entertainment</SelectItem>
                 <SelectItem value="health">Health & Wellness</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="coffee">Coffee & Cafes</SelectItem>
+                <SelectItem value="auto">Automotive</SelectItem>
+                <SelectItem value="beauty">Beauty & Spa</SelectItem>
+                <SelectItem value="fitness">Fitness</SelectItem>
+                <SelectItem value="home_services">Home Services</SelectItem>
+                <SelectItem value="healthcare">Healthcare</SelectItem>
+                <SelectItem value="real_estate">Real Estate</SelectItem>
+                <SelectItem value="professional">Professional Services</SelectItem>
+                <SelectItem value="photography">Photography</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -119,6 +210,16 @@ const AddBusinessDialog = ({ children }: { children: React.ReactNode }) => {
           </div>
           
           <div className="space-y-2">
+            <Label htmlFor="hours">Business Hours</Label>
+            <Input
+              id="hours"
+              value={formData.hours}
+              onChange={(e) => handleInputChange('hours', e.target.value)}
+              placeholder="Mon-Fri 9AM-6PM, Sat 10AM-4PM"
+            />
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -133,8 +234,12 @@ const AddBusinessDialog = ({ children }: { children: React.ReactNode }) => {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-orange-500 hover:bg-orange-600">
-              Submit Business
+            <Button 
+              type="submit" 
+              className="bg-orange-500 hover:bg-orange-600"
+              disabled={loading}
+            >
+              {loading ? 'Adding Business...' : 'Add Business'}
             </Button>
           </div>
         </form>
